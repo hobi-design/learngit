@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State of AI Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #000000;
+            --text-muted: #666666;
+            --line-color: #e5e5e5;
+            --anim-duration: 0.6s;
+            --anim-easing: cubic-bezier(0.2, 1, 0.4, 1); /* Ultra smooth easing */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-y: scroll; 
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px; 
+            margin: 0 auto;
+            padding: 80px 40px;
+        }
+
+        /* --- Header Section --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 40px;
+            font-weight: 400; 
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            max-width: 600px;
+        }
+
+        .nav-arrows {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .nav-arrows button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+        
+        .nav-arrows button:hover {
+            background-color: #f2f2f2;
+        }
+
+        /* --- Card Grid (Flexbox for squishing) --- */
+        .cards-grid {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start; /* Prevents jumping baselines */
+        }
+
+        /* --- Individual Card --- */
+        .card {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            position: relative;
+            flex: 1; /* Equal width by default */
+            min-width: 0; /* Allows text truncation/proper squishing */
+            transition: flex var(--anim-duration) var(--anim-easing);
+        }
+
+        .card:hover {
+            flex: 1.4; /* Horizontal expansion */
+        }
+
+        /* Image Wrapper & States */
+        .img-wrapper {
+            position: relative;
+            width: 100%;
+            height: 240px; 
+            overflow: hidden;
+            transition: height var(--anim-duration) var(--anim-easing);
+            margin-bottom: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .card:hover .img-wrapper {
+            height: 380px; /* Vertical expansion */
+        }
+
+        .card-img {
+            width: 100%;
+            height: 380px; 
+            object-fit: cover;
+            object-position: top center;
+            filter: grayscale(100%);
+            display: block;
+        }
+
+        .coming-soon-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            z-index: 4;
+        }
+
+        /* Bottom Color Bar */
+        .color-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            z-index: 3;
+        }
+
+        /* Canvas for Pixel Effect */
+        .pixel-effect-canvas {
+            position: absolute;
+            bottom: 10px; /* Anchored right above the color bar */
+            left: 0;
+            width: 100%;
+            height: 140px; /* Exact difference between 380 and 240 */
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* --- Card Content --- */
+        .card-content {
+            display: flex;
+            flex-direction: column;
+            padding-right: 12px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-subtitle {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.4;
+            font-weight: 400;
+            margin-bottom: 0;
+            /* Prevents weird reflows on squish */
+            min-height: 40px; 
+        }
+
+        .card-extra-text-container {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s var(--anim-easing), opacity 0.3s ease;
+        }
+
+        .card-extra-text {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            padding-top: 12px; 
+            margin: 0;
+        }
+
+        .card:hover .card-extra-text-container {
+            max-height: 150px; 
+            opacity: 1;
+            transition: max-height 0.5s var(--anim-easing), opacity 0.4s ease 0.2s;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid var(--line-color);
+            margin: 20px 0 16px 0;
+        }
+
+        .notify-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .notify-link span {
+            font-size: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .notify-link:hover span {
+            transform: translateX(4px);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .cards-grid { flex-wrap: wrap; }
+            .card { flex: 1 1 40%; min-width: 250px; }
+            .card:hover { flex: 1 1 45%; }
+            h1 { font-size: 32px; }
+        }
+        @media (max-width: 600px) {
+            .card { flex: 1 1 100%; }
+            .card:hover { flex: 1 1 100%; }
+            .container { padding: 40px 20px; }
+            h1 { font-size: 26px; }
+            header { flex-direction: column; gap: 20px; margin-bottom: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Lorem ipsum dolor sit amet<br>consectetur adipiscing elit.</h1>
+        <div class="nav-arrows">
+            <button aria-label="Previous">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <button aria-label="Next">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="cards-grid">
+        
+        <div class="card" data-color="#c19df6">
+            <div class="img-wrapper">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=800&auto=format&fit=crop" alt="Stripe" class="card-img">
+                <div class="coming-soon-badge">Coming soon</div>
+                <canvas class="pixel-effect-canvas"></canvas>
+                <div class="color-bar" style="background-color: #c19df6;"></div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Lorem Ipsum</h3>
+                <p class="card-subtitle">Sed do eiusmod tempor<br>incididunt ut labore et.</p>
+                <div class="card-extra-text-container">
+                    <p class="card-extra-text">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                </div>
+                <hr>
+                <a href="#" class="notify-link">Get notified <span>→</span></a>
+            </div>
+        </div>
+
+        <div class="card" data-color="#f96b2b">
+            <div class="img-wrapper">
+                <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=800&auto=format&fit=crop" alt="Sierra" class="card-img">
+                <div class="coming-soon-badge">Coming soon</div>
+                <canvas class="pixel-effect-canvas"></canvas>
+                <div class="color-bar" style="background-color: #f96b2b;"></div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Dolor Sit Amet</h3>
+                <p class="card-subtitle">Duis aute irure dolor in reprehenderit in.</p>
+                <div class="card-extra-text-container">
+                    <p class="card-extra-text">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                </div>
+                <hr>
+                <a href="#" class="notify-link">Get notified <span>→</span></a>
+            </div>
+        </div>
+
+        <div class="card" data-color="#c19df6">
+            <div class="img-wrapper">
+                <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=800&auto=format&fit=crop" alt="Anthropic" class="card-img">
+                <div class="coming-soon-badge">Coming soon</div>
+                <canvas class="pixel-effect-canvas"></canvas>
+                <div class="color-bar" style="background-color: #c19df6;"></div>
+            </div>
+            <div class="card-content">
+                <h3 class="card-title">Consectetur</h3>
+                <p class="card-subtitle">Excepteur sint occaecat<br>cupidatat non proident.</p>
+                <div class="card-extra-text-container">
+                    <p class="card-extra-text">Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                </div>
+                <hr>
+                <a href="#" class="notify-link">Get notified <span>→</span></a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.card');
+
+        cards.forEach(card => {
+            const canvas = card.querySelector('.pixel-effect-canvas');
+            const ctx = canvas.getContext('2d');
+            const accentColor = card.dataset.color;
+            let animationFrameId;
+            let timeoutId;
+            let isHovered = false;
+
+            const expansionHeight = 140; 
+            const pixelSize = 45; // Much larger, stylized pixels
+
+            const setupCanvas = () => {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = expansionHeight;
+            };
+
+            // Initial fill ensures the image below the fold is hidden by default
+            setupCanvas();
+            ctx.fillStyle = accentColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Recalculate widths fluidly as the layout flexes
+            const resizeObserver = new ResizeObserver(() => {
+                if (!isHovered) setupCanvas();
+            });
+            resizeObserver.observe(card);
+
+            card.addEventListener('mouseenter', () => {
+                isHovered = true;
+                clearTimeout(timeoutId);
+                cancelAnimationFrame(animationFrameId);
+                setupCanvas(); 
+
+                const width = canvas.width;
+                const height = canvas.height;
+                const cols = Math.ceil(width / pixelSize);
+                const rows = Math.ceil(height / pixelSize);
+                const totalPixels = cols * rows;
+
+                // 1. Maintain the solid fill. As the container expands, this solid block
+                // looks like it's dragging down to reveal the space.
+                ctx.fillStyle = accentColor;
+                ctx.fillRect(0, 0, width, height);
+
+                // 2. CSS transition is 600ms. Reduce delay to start almost immediately as it expands.
+                timeoutId = setTimeout(() => {
+                    if (!isHovered) return;
+
+                    let blocks = [];
+                    for (let i = 0; i < totalPixels; i++) blocks.push(i);
+                    
+                    // Shuffle array for scattered reveal
+                    for (let i = blocks.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+                    }
+
+                    const duration = 400; // Slower pixel drop to match the 600ms expansion
+                    let startTime = performance.now();
+                    let blocksCleared = 0;
+
+                    const renderEffect = (timestamp) => {
+                        const elapsed = timestamp - startTime;
+                        let progress = Math.min(elapsed / duration, 1);
+                        
+                        // Using ease-out for the pixel dropping velocity
+                        const easeOut = 1 - Math.pow(1 - progress, 3);
+                        const targetBlocksToClear = Math.floor(totalPixels * easeOut);
+
+                        while (blocksCleared < targetBlocksToClear && blocksCleared < totalPixels) {
+                            const blockIndex = blocks[blocksCleared];
+                            const col = blockIndex % cols;
+                            const row = Math.floor(blockIndex / cols);
+                            
+                            // +1 px prevents sub-pixel gaps on high DPI screens
+                            ctx.clearRect(col * pixelSize - 1, row * pixelSize - 1, pixelSize + 2, pixelSize + 2);
+                            blocksCleared++;
+                        }
+
+                        if (progress < 1 && isHovered) {
+                            animationFrameId = requestAnimationFrame(renderEffect);
+                        } else if (progress >= 1) {
+                            ctx.clearRect(0, 0, width, height);
+                        }
+                    };
+
+                    animationFrameId = requestAnimationFrame(renderEffect);
+                }, 100); 
+            });
+
+            card.addEventListener('mouseleave', () => {
+                isHovered = false;
+                clearTimeout(timeoutId);
+                cancelAnimationFrame(animationFrameId);
+                
+                // Immediately paint solid so that as the container shrinks back down, it hides the image
+                setupCanvas();
+                ctx.fillStyle = accentColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

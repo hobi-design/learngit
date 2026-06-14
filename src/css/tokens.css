@@ -1,0 +1,106 @@
+/**
+ * tokens.css
+ *
+ * Source of truth: DESIGN.md
+ * This file implements DESIGN.md as CSS custom properties.
+ * Do NOT edit values here without updating DESIGN.md first.
+ * Do NOT reference these tokens from page HTML directly — use global.css classes.
+ */
+
+:root {
+
+  /* ─── Fonts ──────────────────────────────────────────────────────────────── */
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:  'IBM Plex Mono', 'Courier New', monospace;
+  --font-pixel: 'Departure Mono', monospace;
+
+  /* ─── Color: Surfaces (deepest → most elevated) ──────────────────────────── */
+  --color-base:          #0c0c0c;
+  --color-surface:       #141414;
+  --color-surface-raised:#1c1c1c;
+  --color-surface-high:  #242424;
+  --color-surface-hover: #2e2e2e;
+
+  /* ─── Color: Borders ─────────────────────────────────────────────────────── */
+  --color-border-subtle: #1e1e1e;
+  --color-border:        #2a2a2a;
+  --color-border-strong: #383838;
+
+  /* ─── Color: Text (bright → faint) ──────────────────────────────────────── */
+  --color-text-primary:   #e8e8e8;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted:     #666666;
+  --color-text-faint:     #3f3f3f;
+
+  /* ─── Color: Code Blocks (never remapped — always dark surface) ──────────── */
+  /* These are intentionally NOT in the light-mode remap block below.          */
+  /* Code blocks are always dark regardless of theme.                           */
+  --color-code-bg:     #101010;
+  --color-code-text:   #d8d8d8;
+  --color-code-border: #2a2a2a;
+  --color-code-label:  #3f3f3f;
+
+  /* ─── Spacing Scale ──────────────────────────────────────────────────────── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --space-40: 10rem;
+
+  /* ─── Layout ─────────────────────────────────────────────────────────────── */
+  --max-width-page:    1440px;
+  --max-width-content: 900px;
+  --nav-height:        64px;
+  --padding-page:      var(--space-12);   /* 3rem desktop */
+  --padding-page-sm:   var(--space-6);    /* 1.5rem mobile */
+
+  /* ─── Geometry ───────────────────────────────────────────────────────────── */
+  --radius:      0px;         /* zero everywhere by policy */
+  --radius-full: 9999px;      /* circles only (info bubble) */
+
+  /* ─── Motion ─────────────────────────────────────────────────────────────── */
+  --duration-instant: 100ms;
+  --duration-fast:    150ms;
+  --duration-base:    250ms;
+  --ease:             cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ─── Z-Index ─────────────────────────────────────────────────────────────── */
+  --z-behind:  -1;
+  --z-base:     0;
+  --z-sticky:  30;
+  --z-header:  40;
+  --z-overlay: 50;
+  --z-tooltip: 60;
+  --z-modal:   70;
+
+}
+
+/* ─── Light Mode: Semantic Token Remap ───────────────────────────────────────── */
+/*
+ * Only semantic surface/border/text tokens remap.
+ * Code block tokens (--color-code-*) are NOT remapped — they stay dark.
+ * Components never need conditional dark/light logic — only token values swap.
+ */
+
+[data-theme="light"] {
+  --color-base:           #f2f2f2;
+  --color-surface:        #e8e8e8;
+  --color-surface-raised: #dedede;
+  --color-surface-high:   #d4d4d4;
+  --color-surface-hover:  #c8c8c8;
+
+  --color-border-subtle:  #dedede;
+  --color-border:         #d0d0d0;
+  --color-border-strong:  #b8b8b8;
+
+  --color-text-primary:   #181818;
+  --color-text-secondary: #484848;
+  --color-text-muted:     #787878;
+  --color-text-faint:     #a0a0a0;
+}

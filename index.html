@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Git fundamentals for vibe coders — repository lifecycle, staging, commits, and remote workflows.">
+    <title>Git Documentation | Technical Overview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Load theme toggle before paint to avoid flash -->
+    <script src="/src/components/theme-toggle.js"></script>
+    <style>
+        @font-face {
+            font-family: 'Departure Mono';
+            src: url('/public/fonts/DepartureMono-Regular.woff2') format('woff2');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* ── Paste original style.css inline so this page is fully self-contained ── */
+
+        :root {
+            --bg-main: #ffffff;
+            --bg-subtle: #fafafa;
+            --text-primary: #111111;
+            --text-muted: #666666;
+            --text-faint: #999999;
+            --border-color: #e5e5e5;
+            --accent: #111111;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+            --max-width: 1100px;
+            --radius: 2px;
+            --ease-apple: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-out: cubic-bezier(0, 0, 0.2, 1);
+        }
+
+        /* Dark mode token remap */
+        [data-theme="dark"] {
+            --bg-main: #0c0c0c;
+            --bg-subtle: #141414;
+            --text-primary: #e8e8e8;
+            --text-muted: #a0a0a0;
+            --text-faint: #666666;
+            --border-color: #2a2a2a;
+        }
+
+        ::selection { background: var(--text-primary); color: var(--bg-main); }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            transition: background-color 0.25s, color 0.25s;
+        }
+
+        /* ── Typography ───────────────────────────────────────────────────── */
+        .display-title {
+            font-size: 4.5rem;
+            font-weight: 400;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .lead-text {
+            font-size: 1.35rem;
+            color: rgba(255,255,255,0.6);
+            font-weight: 400;
+            max-width: 650px;
+            margin: 0 auto;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .body-text { font-size: 0.9375rem; color: var(--text-muted); line-height: 1.6; }
+        .body-sm   { font-size: 0.875rem;  color: var(--text-muted); }
+        .body-xs   { font-size: 0.75rem;   color: var(--text-faint); }
+
+        /* ── Nav ─────────────────────────────────────────────────────────── */
+        .site-header {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 70px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            background: rgba(26,26,27,0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s var(--ease-apple);
+        }
+
+        .site-header.scrolled {
+            background: rgba(255,255,255,0.85);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        [data-theme="dark"] .site-header.scrolled {
+            background: rgba(12,12,12,0.85);
+            border-bottom: 1px solid #1e1e1e;
+        }
+
+        .nav-container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-family: 'Departure Mono', monospace;
+            font-size: 1.1rem;
+            color: #ffffff;
+            text-decoration: none;
+            letter-spacing: -0.02em;
+            transition: color 0.3s var(--ease-apple);
+        }
+
+        .site-header.scrolled .nav-logo { color: var(--text-primary); }
+
+        .nav-links { display: flex; align-items: center; gap: 2rem; }
+
+        .nav-link {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: color 0.3s var(--ease-apple);
+            position: relative;
+            padding: 0.25rem 0;
+        }
+
+        .nav-link:hover { color: #ffffff; }
+        .site-header.scrolled .nav-link { color: var(--text-muted); }
+        .site-header.scrolled .nav-link:hover { color: var(--text-primary); }
+
+        .nav-link.active { color: #ffffff; }
+        .site-header.scrolled .nav-link.active { color: var(--text-primary); }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 1px;
+            background: #ffffff;
+        }
+
+        .site-header.scrolled .nav-link.active::after { background: var(--text-primary); }
+
+        /* Theme toggle inside nav */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: 1px solid rgba(255,255,255,0.25);
+            cursor: pointer;
+            color: rgba(255,255,255,0.6);
+            transition: border-color 0.2s, color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover { border-color: rgba(255,255,255,0.6); color: #ffffff; }
+        .site-header.scrolled .theme-toggle { border-color: var(--border-color); color: var(--text-muted); }
+        .site-header.scrolled .theme-toggle:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+        .theme-toggle svg { width: 13px; height: 13px; fill: currentColor; pointer-events: none; }
+
+        /* Show/hide icon based on theme — default is dark (no attribute or dark) */
+        .theme-toggle .icon-moon { display: block; }
+        .theme-toggle .icon-sun  { display: none; }
+        [data-theme="light"] .theme-toggle .icon-moon { display: none; }
+        [data-theme="light"] .theme-toggle .icon-sun  { display: block; }
+
+        /* ── Hero ────────────────────────────────────────────────────────── */
+        .hero-section {
+            padding: 0 2rem;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #1a1a1b;
+            color: #ffffff;
+            position: relative;
+        }
+
+        .hero-content { text-align: center; max-width: 800px; }
+
+        .pixel-text {
+            font-family: 'Departure Mono', monospace;
+            font-size: 1.1em;
+            position: relative;
+            display: inline-block;
+            color: #ffffff;
+            letter-spacing: -0.02em;
+            -webkit-font-smoothing: none;
+        }
+
+        /* ── Pixel Grid Canvas ───────────────────────────────────────────── */
+        #grid-container { margin-bottom: 6rem; }
+
+        /* ── Timeline ────────────────────────────────────────────────────── */
+        .content-container { margin: 0 auto; }
+
+        .timeline-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 6rem;
+        }
+
+        .timeline {
+            margin-top: 2rem;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 15vh;
+            padding-bottom: 10vh;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 0; bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            background: var(--border-color);
+            z-index: 1;
+        }
+
+        .timeline-progress {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            background: var(--text-primary);
+            z-index: 2;
+            height: 0%;
+        }
+
+        .timeline-item { position: relative; width: 100%; z-index: 3; }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px; height: 16px;
+            background: var(--bg-main);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            z-index: 4;
+        }
+
+        .timeline-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .diagram-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 2rem;
+            border: 1px solid var(--border-color);
+            background: var(--bg-subtle);
+            border-radius: var(--radius);
+            padding: 1rem;
+        }
+
+        .diagram-container svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            color: var(--text-primary);
+        }
+
+        .timeline-title-lg {
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .context-panel { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+        .command-panel { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+
+        .step-tag {
+            font-size: 0.625rem;
+            font-weight: 600;
+            background: var(--text-primary);
+            color: var(--bg-main);
+            padding: 4px 8px;
+            border: 1px solid var(--text-primary);
+            border-radius: var(--radius);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            width: fit-content;
+            margin-bottom: 0.5rem;
+        }
+
+        .code-interactive {
+            background: var(--bg-main);
+            border-radius: var(--radius);
+            cursor: copy;
+            position: relative;
+            overflow: hidden;
+            width: fit-content;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s var(--ease-apple);
+        }
+
+        .code-interactive:hover { border-color: var(--text-primary); }
+
+        .code-interactive::after {
+            content: 'Copy';
+            position: absolute;
+            right: 0.5rem; top: 50%;
+            transform: translateY(-50%) translateX(10px);
+            font-size: 0.65rem;
+            font-weight: 600;
+            opacity: 0;
+            color: var(--text-muted);
+            transition: all 0.3s var(--ease-apple);
+        }
+
+        .code-interactive:hover::after { opacity: 1; transform: translateY(-50%) translateX(0); }
+        .code-interactive:active { background: var(--bg-subtle); transform: scale(0.98); }
+
+        .code-block {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .alt-command {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .alt-label { font-size: 0.75rem; color: var(--text-faint); }
+
+        /* ── Footer ──────────────────────────────────────────────────────── */
+        .site-footer { padding: 6rem 0; border-top: 1px solid var(--border-color); }
+        .footer-container { max-width: var(--max-width); margin: 0 auto; padding: 0 2rem; text-align: center; }
+        .footer-text { font-size: 0.75rem; font-weight: 500; color: var(--text-faint); }
+
+        /* ── Responsive ──────────────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .timeline::before, .timeline-progress { left: 0; transform: none; }
+            .timeline-dot { left: 0; transform: translate(-50%, -50%); }
+            .timeline-grid { grid-template-columns: 1fr; gap: 3rem; padding-left: 2rem; }
+            .context-panel, .command-panel { align-items: flex-start; text-align: left; }
+            .display-title { font-size: 2.5rem; }
+            .timeline { gap: 10vh; }
+        }
+
+        @media (max-width: 600px) {
+            .timeline-container { padding: 0 1.5rem 6rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed Navigation Header -->
+    <header class="site-header" id="site-header">
+        <div class="nav-container">
+            <a href="/index.html" class="nav-logo">Git Fundamentals</a>
+            <nav class="nav-links">
+                <a href="/index.html" class="nav-link active">Fundamentals</a>
+                <a href="/best-practices.html" class="nav-link">Best Practices</a>
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="content-container">
+
+        <!-- Hero Section — Dark slate, centered, Departure Mono title word -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="display-title"><span class="pixel-text">Git</span> Fundamentals</h1>
+                <p class="lead-text">A quick reference guide for vibe coders who want to be in control of how their code is managed.</p>
+            </div>
+        </section>
+
+        <!-- Interactive Pixel Grid Transition (40vh below hero) -->
+        <div id="grid-container" style="position: relative; width: 100%; height: 40vh; background-color: #1a1a1b;">
+            <canvas id="pixel-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+        </div>
+
+        <!-- Scrolling Timeline -->
+        <section id="lifecycle" class="content-section timeline-container">
+            <div class="timeline">
+                <div class="timeline-progress"></div>
+
+                <!-- Phase 1: Initialize -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-grid">
+                        <div class="context-panel">
+                            <span class="step-tag">Phase 1</span>
+                            <h4 class="timeline-title-lg">Initialize Repository</h4>
+                            <p class="body-text">Start tracking your project files by creating a new local Git repository.</p>
+                        </div>
+                        <div class="command-panel">
+                            <div class="code-interactive" onclick="navigator.clipboard.writeText('git init')">
+                                <code class="code-block">&gt; git init</code>
+                            </div>
+                            <p class="body-sm" style="margin-top: 1rem;">Initializes a new, empty local version control environment.</p>
+
+                            <div class="diagram-container">
+                                <svg viewBox="0 0 400 160" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <defs>
+                                        <pattern id="grid1" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.4"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="400" height="160" fill="url(#grid1)" stroke="none"/>
+                                    <!-- Folder -->
+                                    <rect x="60" y="40" width="120" height="80" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="120" y="85" font-family="monospace" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">project/</text>
+                                    <!-- Arrow -->
+                                    <line x1="190" y1="80" x2="240" y2="80"/>
+                                    <polygon points="235,75 245,80 235,85" fill="currentColor" stroke="none"/>
+                                    <text x="215" y="70" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.6">git init</text>
+                                    <!-- Folder with .git -->
+                                    <rect x="250" y="40" width="120" height="80" rx="2" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="310" y="72" font-family="monospace" font-size="11" fill="currentColor" text-anchor="middle">project/</text>
+                                    <text x="310" y="90" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.7">└── .git/</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 2: Stage -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-grid">
+                        <div class="context-panel">
+                            <span class="step-tag">Phase 2</span>
+                            <h4 class="timeline-title-lg">Stage Changes</h4>
+                            <p class="body-text">Git doesn't track changes automatically. You choose exactly what goes into the next snapshot.</p>
+                        </div>
+                        <div class="command-panel">
+                            <div class="code-interactive" onclick="navigator.clipboard.writeText('git add -p')">
+                                <code class="code-block">&gt; git add -p</code>
+                            </div>
+                            <p class="body-sm" style="margin-top: 1rem;">Review each change hunk-by-hunk before staging it.</p>
+                            <div class="alt-command">
+                                <span class="alt-label">Also common:</span>
+                                <code class="code-block" style="font-size: 11px; color: var(--text-muted);">git add &lt;filename&gt;</code>
+                                <code class="code-block" style="font-size: 11px; color: var(--text-muted);">git status</code>
+                            </div>
+
+                            <div class="diagram-container">
+                                <svg viewBox="0 0 400 160" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <defs>
+                                        <pattern id="grid2" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.4"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="400" height="160" fill="url(#grid2)" stroke="none"/>
+                                    <!-- Working dir -->
+                                    <rect x="20" y="30" width="100" height="100" rx="1" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="70" y="52" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">Working</text>
+                                    <text x="70" y="64" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">Tree</text>
+                                    <text x="70" y="90" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle">file.py (M)</text>
+                                    <!-- Arrow 1 -->
+                                    <line x1="126" y1="80" x2="155" y2="80"/>
+                                    <polygon points="150,75 160,80 150,85" fill="currentColor" stroke="none"/>
+                                    <text x="141" y="70" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.7">add</text>
+                                    <!-- Index -->
+                                    <rect x="164" y="30" width="100" height="100" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                    <text x="214" y="52" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">Index</text>
+                                    <text x="214" y="64" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">(Staged)</text>
+                                    <text x="214" y="90" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle">file.py ✓</text>
+                                    <!-- Arrow 2 -->
+                                    <line x1="270" y1="80" x2="298" y2="80"/>
+                                    <polygon points="293,75 303,80 293,85" fill="currentColor" stroke="none"/>
+                                    <text x="284" y="70" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.7">commit</text>
+                                    <!-- Repo -->
+                                    <rect x="307" y="30" width="76" height="100" rx="1" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="345" y="75" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">.git/</text>
+                                    <text x="345" y="90" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.6">repo</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 3: Commit -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-grid">
+                        <div class="context-panel">
+                            <span class="step-tag">Phase 3</span>
+                            <h4 class="timeline-title-lg">Create a Commit</h4>
+                            <p class="body-text">A commit is a permanent, named snapshot of your staged changes. It records who, what, and when.</p>
+                        </div>
+                        <div class="command-panel">
+                            <div class="code-interactive" onclick="navigator.clipboard.writeText('git commit -m \"feat: add login flow\"')">
+                                <code class="code-block">&gt; git commit -m "feat: add login flow"</code>
+                            </div>
+                            <p class="body-sm" style="margin-top: 1rem;">Creates a snapshot in history. Retrievable forever.</p>
+                            <p class="body-sm" style="margin-top: 0.5rem;">
+                                See <a href="/best-practices.html" style="color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px;">Best Practices</a> for message conventions.
+                            </p>
+
+                            <div class="diagram-container">
+                                <svg viewBox="0 0 400 120" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <defs>
+                                        <pattern id="grid3" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.4"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="400" height="120" fill="url(#grid3)" stroke="none"/>
+                                    <!-- Commit chain -->
+                                    <circle cx="60"  cy="60" r="16" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="60" y="64" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle">a1b2c3</text>
+                                    <line x1="76" y1="60" x2="114" y2="60"/>
+                                    <circle cx="130" cy="60" r="16" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="130" y="64" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle">d4e5f6</text>
+                                    <line x1="146" y1="60" x2="184" y2="60"/>
+                                    <circle cx="200" cy="60" r="16" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="200" y="64" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle">g7h8i9</text>
+                                    <line x1="216" y1="60" x2="264" y2="60" stroke-dasharray="4 3"/>
+                                    <circle cx="280" cy="60" r="18" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <text x="280" y="56" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle">j0k1l2</text>
+                                    <text x="280" y="68" font-family="monospace" font-size="6" fill="currentColor" text-anchor="middle" opacity="0.6">← HEAD</text>
+                                    <!-- Labels -->
+                                    <text x="60"  y="92" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.5">init</text>
+                                    <text x="130" y="92" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.5">feat</text>
+                                    <text x="200" y="92" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.5">fix</text>
+                                    <text x="280" y="98" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.5">new</text>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phase 4: Push -->
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-grid">
+                        <div class="context-panel">
+                            <span class="step-tag">Phase 4</span>
+                            <h4 class="timeline-title-lg">Push to Remote</h4>
+                            <p class="body-text">A remote is a version of your repository on the internet (e.g. GitHub). Push sends your local commits there.</p>
+                        </div>
+                        <div class="command-panel">
+                            <div class="code-interactive" onclick="navigator.clipboard.writeText('git push -u origin main')">
+                                <code class="code-block">&gt; git push -u origin main</code>
+                            </div>
+                            <p class="body-sm" style="margin-top: 1rem;">Sends commits to the remote and sets tracking branch.</p>
+                            <div class="alt-command">
+                                <span class="alt-label">First time setup:</span>
+                                <code class="code-block" style="font-size: 11px; color: var(--text-muted);">git remote add origin &lt;url&gt;</code>
+                            </div>
+
+                            <div class="diagram-container">
+                                <svg viewBox="0 0 400 120" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <defs>
+                                        <pattern id="grid4" width="20" height="20" patternUnits="userSpaceOnUse">
+                                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="currentColor" stroke-width="0.3" opacity="0.4"/>
+                                        </pattern>
+                                    </defs>
+                                    <rect width="400" height="120" fill="url(#grid4)" stroke="none"/>
+                                    <!-- Local -->
+                                    <rect x="20" y="30" width="110" height="60" rx="1" fill="none" stroke="currentColor" stroke-width="1"/>
+                                    <text x="75" y="57" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.7">Local</text>
+                                    <text x="75" y="72" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle">3 commits</text>
+                                    <!-- Arrow push -->
+                                    <line x1="136" y1="60" x2="190" y2="60"/>
+                                    <polygon points="185,55 195,60 185,65" fill="currentColor" stroke="none"/>
+                                    <text x="163" y="50" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.7">git push</text>
+                                    <!-- Arrow pull -->
+                                    <line x1="136" y1="72" x2="190" y2="72"/>
+                                    <polygon points="141,67 131,72 141,77" fill="currentColor" stroke="none"/>
+                                    <text x="163" y="85" font-family="monospace" font-size="8" fill="currentColor" text-anchor="middle" opacity="0.7">git pull</text>
+                                    <!-- Remote -->
+                                    <rect x="198" y="30" width="110" height="60" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                                    <text x="253" y="57" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle" opacity="0.7">GitHub</text>
+                                    <text x="253" y="72" font-family="monospace" font-size="9" fill="currentColor" text-anchor="middle">origin/main</text>
+                                    <!-- Collaborator -->
+                                    <rect x="330" y="30" width="56" height="60" rx="1" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 2"/>
+                                    <text x="358" y="57" font-family="monospace" font-size="7" fill="currentColor" text-anchor="middle" opacity="0.5">collab</text>
+                                    <line x1="314" y1="60" x2="327" y2="60" stroke-dasharray="3 2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /timeline -->
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-container">
+            <p class="footer-text">Git Crash Course &middot; v1.0</p>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ── Nav header scroll state ──────────────────────────────────────────
+        const header = document.getElementById('site-header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 60) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }, { passive: true });
+
+        // ── Copy-to-clipboard feedback ───────────────────────────────────────
+        document.querySelectorAll('.code-interactive').forEach(el => {
+            el.addEventListener('click', () => {
+                el.style.borderColor = 'var(--text-primary)';
+                setTimeout(() => el.style.borderColor = '', 600);
+            });
+        });
+
+        // ── Pixel Grid Transition ────────────────────────────────────────────
+        const gridContainer = document.getElementById('grid-container');
+        const canvas        = document.getElementById('pixel-canvas');
+        const ctx           = canvas.getContext('2d');
+
+        const config = {
+            cellSize:       96,
+            noiseIntensity: 0.85,
+            colorTop:       '#1a1a1b',  // hero slate — grid fills from above
+            colorBottom:    '#ffffff',  // page background below
+        };
+
+        let cells = [], cols = 0, rows = 0;
+
+        function resize() {
+            const dpr = window.devicePixelRatio || 1;
+            const w   = window.innerWidth;
+            const h   = gridContainer.clientHeight;
+            canvas.width  = w * dpr;
+            canvas.height = h * dpr;
+            canvas.style.width  = w + 'px';
+            canvas.style.height = h + 'px';
+            ctx.scale(dpr, dpr);
+            cols = Math.ceil(w / config.cellSize);
+            rows = Math.ceil(h / config.cellSize);
+            cells = [];
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    cells.push({
+                        x:     c * config.cellSize,
+                        y:     r * config.cellSize,
+                        r,
+                        noise: Math.random() - 0.5,
+                        state: 1,
+                    });
+                }
+            }
+        }
+
+        function render() {
+            // Detect current bg color from CSS variable for colorBottom
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+                           (!document.documentElement.getAttribute('data-theme') &&
+                            window.matchMedia('(prefers-color-scheme: dark)').matches);
+            const bottom = isDark ? '#0c0c0c' : '#ffffff';
+
+            const rect     = gridContainer.getBoundingClientRect();
+            const vh       = window.innerHeight;
+            let   progress = (vh - rect.top) / (vh + rect.height);
+            progress       = Math.max(0, Math.min(1, progress));
+
+            ctx.fillStyle = bottom;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const threshold = (1 - progress) * 1.5 - 0.25;
+
+            cells.forEach(cell => {
+                const yn     = cell.r / rows;
+                const target = (threshold + cell.noise * config.noiseIntensity > yn) ? 1 : 0;
+                cell.state  += (target - cell.state) * 0.15;
+                if (cell.state > 0.01) {
+                    ctx.fillStyle   = config.colorTop;
+                    ctx.globalAlpha = Math.min(1, cell.state);
+                    ctx.fillRect(cell.x, cell.y, config.cellSize + 0.5, config.cellSize + 0.5);
+                }
+            });
+            ctx.globalAlpha = 1;
+            requestAnimationFrame(render);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        render();
+
+        // ── Timeline Scroll Progress ─────────────────────────────────────────
+        const timeline = document.querySelector('.timeline');
+        const progress = document.querySelector('.timeline-progress');
+
+        window.addEventListener('scroll', () => {
+            if (!timeline || !progress) return;
+            const rect         = timeline.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            const startOffset  = rect.top - (windowHeight / 2);
+            const totalHeight  = rect.height;
+            let   pct          = (Math.abs(Math.min(startOffset, 0)) / totalHeight) * 100;
+            pct                = Math.max(0, Math.min(pct, 100));
+            progress.style.height = pct + '%';
+        }, { passive: true });
+
+    });
+    </script>
+
+</body>
+</html>

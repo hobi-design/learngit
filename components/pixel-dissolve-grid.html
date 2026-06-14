@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CANTOR8 - Pure Scroll Grid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0d0d0f;
+      margin: 0;
+      padding: 0;
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d0d0f;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+    }
+  </style>
+</head>
+<body class="overflow-x-hidden">
+
+  <!-- Top 100vh Solid Blue Section -->
+  <section class="h-screen w-full bg-[#0047C4]"></section>
+
+  <!-- Transition Canvas Container -->
+  <div id="grid-container" class="relative w-full h-[600px] bg-[#0d0d0f]">
+    <canvas id="pixel-canvas" class="w-full h-full block"></canvas>
+  </div>
+
+  <!-- Bottom 100vh Solid Dark Section -->
+  <section class="h-screen w-full bg-[#0d0d0f]"></section>
+
+  <script>
+    const config = {
+      cellSize: 48,
+      noiseIntensity: 0.35,
+      colorTop: '#0047C4',
+      colorBottom: '#0d0d0f'
+    };
+
+    const container = document.getElementById('grid-container');
+    const canvas = document.getElementById('pixel-canvas');
+    const ctx = canvas.getContext('2d');
+    
+    let cells = [];
+    let cols = 0;
+    let rows = 0;
+
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      const width = window.innerWidth;
+      const height = container.clientHeight;
+      
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.scale(dpr, dpr);
+      
+      initGrid(width, height);
+    }
+
+    function initGrid(width, height) {
+      cols = Math.ceil(width / config.cellSize);
+      rows = Math.ceil(height / config.cellSize);
+      cells = [];
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          cells.push({
+            x: c * config.cellSize,
+            y: r * config.cellSize,
+            r: r,
+            noise: Math.random() - 0.5,
+            state: 1 // Starts fully solid top color
+          });
+        }
+      }
+    }
+
+    function updateAndRender() {
+      const rect = container.getBoundingClientRect();
+      const viewHeight = window.innerHeight;
+      
+      // Calculate scroll progress through the transition section
+      const startTrigger = viewHeight; 
+      const endTrigger = -rect.height;
+      let progress = (startTrigger - rect.top) / (startTrigger - endTrigger);
+      progress = Math.max(0, Math.min(1, progress));
+
+      ctx.fillStyle = config.colorBottom;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Threshold algorithm guarantees solid top edge when entering, fully dissolved when leaving
+      const threshold = (1.0 - progress) * 1.5 - 0.25;
+
+      cells.forEach(cell => {
+        const yNormalized = cell.r / rows;
+        const targetState = (threshold + cell.noise * config.noiseIntensity > yNormalized) ? 1 : 0;
+        
+        cell.state += (targetState - cell.state) * 0.15;
+
+        if (cell.state > 0.01) {
+          ctx.fillStyle = config.colorTop;
+          ctx.globalAlpha = Math.min(1, cell.state);
+          // Minor bleed overlap to avoid subpixel gaps between cells
+          ctx.fillRect(cell.x, cell.y, config.cellSize + 0.5, config.cellSize + 0.5);
+        }
+      });
+      ctx.globalAlpha = 1.0;
+    }
+
+    function loop() {
+      updateAndRender();
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+    window.onload = () => {
+      resize();
+      loop();
+    };
+  </script>
+</body>
+</html>

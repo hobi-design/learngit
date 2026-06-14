@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel Dissolve Component</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #fcfcfc;
+            color: #111111;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Group hover utilities for custom transitions */
+        .group:hover .group-hover\:scale-105 {
+            transform: scale(1.05);
+        }
+        
+        .transition-transform {
+            transition-property: transform;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 2000ms;
+        }
+
+        .ease-out {
+            transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="min-h-screen w-full pb-32 selection:bg-neutral-200 selection:text-neutral-900">
+
+    <!-- Navigation -->
+    <nav class="w-full border-b border-neutral-200 px-6 md:px-12 py-5 flex justify-between items-center bg-white sticky top-0 z-50">
+        <div class="flex items-center gap-3 font-medium text-sm text-neutral-900">
+            <i data-lucide="terminal" class="w-4 h-4"></i>
+            <span class="tracking-tight">Component Template</span>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="px-6 md:px-12 pt-24 pb-16 max-w-6xl mx-auto">
+        <h1 class="text-5xl md:text-6xl font-semibold tracking-tight text-neutral-900 mb-6">
+            Pixel Dissolve.
+        </h1>
+    </header>
+
+    <!-- Grid Content - Rigid 2 Column Structure -->
+    <main class="px-6 md:px-12 max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <!-- Card 1 -->
+            <div class="protocol-card flex flex-col border border-neutral-200 bg-white rounded-[4px] overflow-hidden group h-[400px]">
+                
+                <!-- Top Header - Always Visible -->
+                <div class="p-6 border-b border-neutral-200 bg-white relative z-30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-neutral-50 border border-neutral-200 rounded-[2px] text-neutral-900">
+                            <i data-lucide="box" class="w-[18px] h-[18px]"></i>
+                        </div>
+                        <span class="font-mono text-[10px] uppercase font-semibold text-neutral-400 tracking-widest">
+                            LOREM IPSUM
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-semibold tracking-tight text-neutral-900 line-clamp-1">Lorem Ipsum</h3>
+                    <p class="text-sm font-medium text-neutral-500 mt-1 line-clamp-1">Consectetur adipiscing elit.</p>
+                </div>
+
+                <!-- Bottom Area - The Reveal Mechanism -->
+                <div class="relative flex-1 bg-[#0a0a0a] overflow-hidden cursor-pointer">
+                    
+                    <!-- Underneath: The Revealed Content (Dark Terminal UI) -->
+                    <div class="absolute inset-0 z-0">
+                        <!-- Subtle Geometric Background (Pattern 1) -->
+                        <div 
+                            class="absolute inset-0 opacity-40 transition-transform duration-[2s] ease-out group-hover:scale-105"
+                            style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h24v24H0V0zm1 1h22v22H1V1z' fill='%23222222' fill-rule='evenodd'/%3E%3C/svg%3E&quot;);">
+                        </div>
+                        
+                        <div class="relative z-10 p-6 flex flex-col h-full justify-between">
+                            <p class="text-sm text-neutral-300 leading-relaxed font-sans">
+                                Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            </p>
+                            <div class="mt-4">
+                                <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 mb-2">
+                                    Execution Prompt
+                                </div>
+                                <code class="block font-mono text-xs text-white border-l-2 border-neutral-600 pl-3 py-0.5">
+                                    "Duis aute irure dolor in reprehenderit in voluptate velit."
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Cover: Solid Canvas that dissolves into pixels -->
+                    <canvas class="pixel-canvas absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="protocol-card flex flex-col border border-neutral-200 bg-white rounded-[4px] overflow-hidden group h-[400px]">
+                
+                <!-- Top Header - Always Visible -->
+                <div class="p-6 border-b border-neutral-200 bg-white relative z-30">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-2 bg-neutral-50 border border-neutral-200 rounded-[2px] text-neutral-900">
+                            <i data-lucide="layers" class="w-[18px] h-[18px]"></i>
+                        </div>
+                        <span class="font-mono text-[10px] uppercase font-semibold text-neutral-400 tracking-widest">
+                            LOREM IPSUM
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-semibold tracking-tight text-neutral-900 line-clamp-1">Dolor Sit Amet</h3>
+                    <p class="text-sm font-medium text-neutral-500 mt-1 line-clamp-1">Sed do eiusmod tempor.</p>
+                </div>
+
+                <!-- Bottom Area - The Reveal Mechanism -->
+                <div class="relative flex-1 bg-[#0a0a0a] overflow-hidden cursor-pointer">
+                    
+                    <!-- Underneath: The Revealed Content (Dark Terminal UI) -->
+                    <div class="absolute inset-0 z-0">
+                        <!-- Subtle Geometric Background (Pattern 2) -->
+                        <div 
+                            class="absolute inset-0 opacity-40 transition-transform duration-[2s] ease-out group-hover:scale-105"
+                            style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='16' height='16' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='1.5' fill='%232a2a2a'/%3E%3C/svg%3E&quot;);">
+                        </div>
+                        
+                        <div class="relative z-10 p-6 flex flex-col h-full justify-between">
+                            <p class="text-sm text-neutral-300 leading-relaxed font-sans">
+                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident.
+                            </p>
+                            <div class="mt-4">
+                                <div class="font-mono text-[10px] uppercase tracking-widest text-neutral-500 mb-2">
+                                    Execution Prompt
+                                </div>
+                                <code class="block font-mono text-xs text-white border-l-2 border-neutral-600 pl-3 py-0.5">
+                                    "Excepteur sint occaecat cupidatat non proident."
+                                </code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- The Cover: Solid Canvas that dissolves into pixels -->
+                    <canvas class="pixel-canvas absolute inset-0 w-full h-full pointer-events-none z-20"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Vanilla JS Logic for Pixel Dissolve -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.protocol-card');
+            
+            cards.forEach(card => {
+                const canvas = card.querySelector('.pixel-canvas');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+                const pixelSize = 25; // Size of the dissolve blocks
+                const solidColor = '#f5f5f5';
+                
+                let animationFrameId;
+                let timeoutId;
+                let isHovered = false;
+
+                const setupCanvas = () => {
+                    const rect = canvas.parentElement.getBoundingClientRect();
+                    canvas.width = rect.width;
+                    canvas.height = rect.height;
+                };
+
+                const paintSolid = () => {
+                    ctx.fillStyle = solidColor;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                };
+
+                // Watch for window resizes to maintain sharp canvas rendering
+                const resizeObserver = new ResizeObserver(() => {
+                    if (!isHovered) {
+                        setupCanvas();
+                        paintSolid();
+                    }
+                });
+                resizeObserver.observe(canvas.parentElement);
+
+                // Initial Paint
+                setupCanvas();
+                paintSolid();
+
+                card.addEventListener('mouseenter', () => {
+                    isHovered = true;
+                    clearTimeout(timeoutId);
+                    cancelAnimationFrame(animationFrameId);
+                    setupCanvas();
+                    paintSolid();
+
+                    // Start the dissolve animation
+                    timeoutId = setTimeout(() => {
+                        const width = canvas.width;
+                        const height = canvas.height;
+                        const cols = Math.ceil(width / pixelSize);
+                        const rows = Math.ceil(height / pixelSize);
+                        const totalPixels = cols * rows;
+
+                        let blocks = Array.from({ length: totalPixels }, (_, i) => i);
+                        // Shuffle array for scattered, randomized reveal
+                        for (let i = blocks.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+                        }
+
+                        const duration = 350; // Snappy dissolve duration in ms
+                        let startTime = performance.now();
+                        let blocksCleared = 0;
+
+                        const renderEffect = (timestamp) => {
+                            const elapsed = timestamp - startTime;
+                            let progress = Math.min(elapsed / duration, 1);
+                            
+                            // Cubic ease-out velocity
+                            const easeOut = 1 - Math.pow(1 - progress, 3);
+                            const targetBlocksToClear = Math.floor(totalPixels * easeOut);
+
+                            while (blocksCleared < targetBlocksToClear && blocksCleared < totalPixels) {
+                                const blockIndex = blocks[blocksCleared];
+                                const col = blockIndex % cols;
+                                const row = Math.floor(blockIndex / cols);
+                                
+                                // clearRect removes the solid pixel, revealing the HTML underneath
+                                ctx.clearRect(col * pixelSize - 1, row * pixelSize - 1, pixelSize + 2, pixelSize + 2);
+                                blocksCleared++;
+                            }
+
+                            if (progress < 1) {
+                                animationFrameId = requestAnimationFrame(renderEffect);
+                            } else {
+                                ctx.clearRect(0, 0, width, height);
+                            }
+                        };
+
+                        animationFrameId = requestAnimationFrame(renderEffect);
+                    }, 50);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    isHovered = false;
+                    // Instantly restore the solid block
+                    clearTimeout(timeoutId);
+                    cancelAnimationFrame(animationFrameId);
+                    setupCanvas();
+                    paintSolid();
+                });
+            });
+        });
+    </script>
+</body>
+</html>

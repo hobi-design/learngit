@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swiss Expandable Grid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #000000;
+            --text-muted: #555555;
+            --line-color: #e0e0e0;
+            --anim-easing: cubic-bezier(0.2, 1, 0.4, 1);
+            
+            /* Exact Primer Logo Colors */
+            --color-orange: #f97316;
+            --color-yellow: #eab308;
+            --color-blue:   #3b82f6;
+
+            /* Image Dimensions */
+            --img-base-w: 240px;
+            --img-base-h: 160px;
+            --img-exp-w: 340px;
+            --img-exp-h: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            padding: 40px;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 84px;
+            font-weight: 500;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            margin-bottom: 80px;
+            max-width: 900px;
+        }
+
+        .rows-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .row-card {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 32px;
+            padding: 40px 0;
+            border-top: 1px solid var(--line-color);
+            cursor: pointer;
+            position: relative;
+            align-items: flex-start;
+        }
+
+        .row-card:last-child {
+            border-bottom: 1px solid var(--line-color);
+        }
+
+        /* Columns allocation */
+        .col-title {
+            grid-column: 1 / 4; /* Cols 1, 2, 3 */
+        }
+        .col-text {
+            grid-column: 4 / 9; /* Cols 4, 5, 6, 7, 8 */
+            padding-right: 20px;
+        }
+        
+        /* The container drives the row height push */
+        .col-image {
+            grid-column: 9 / 13; /* Cols 9, 10, 11, 12 */
+            position: relative;
+            height: var(--img-base-h);
+            transition: height 0.5s var(--anim-easing);
+        }
+
+        .row-card:hover .col-image {
+            height: var(--img-exp-h);
+        }
+
+        .row-title {
+            font-size: 28px;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+        }
+
+        .row-subtitle {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-main);
+            margin-bottom: 0;
+        }
+
+        /* Hidden text contributes to pushing rows down smoothly via max-height */
+        .extra-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            max-height: 0;
+            margin-top: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s var(--anim-easing), opacity 0.3s ease, margin-top 0.5s var(--anim-easing);
+        }
+
+        .row-card:hover .extra-text {
+            max-height: 150px;
+            margin-top: 16px;
+            opacity: 1;
+            transition: max-height 0.5s var(--anim-easing), opacity 0.4s ease 0.1s, margin-top 0.5s var(--anim-easing);
+        }
+
+        .img-wrapper {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: var(--img-base-w);
+            height: var(--img-base-h);
+            overflow: hidden;
+            transition: width 0.5s var(--anim-easing), height 0.5s var(--anim-easing);
+            z-index: 10;
+            background-color: #f5f5f5;
+        }
+
+        .row-card:hover .img-wrapper {
+            width: var(--img-exp-w);
+            height: var(--img-exp-h);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .card-img {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: var(--img-exp-w); /* Rendered at max size, stays stationary */
+            height: var(--img-exp-h);
+            object-fit: cover;
+            display: block;
+            z-index: 1;
+        }
+
+        .color-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            z-index: 3;
+        }
+
+        .pixel-effect-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            .row-card { display: flex; flex-direction: column; gap: 24px; padding: 40px 0; }
+            .col-image { width: 100%; height: var(--img-base-h); }
+            .img-wrapper { right: auto; left: 0; width: 100%; }
+            .row-card:hover .img-wrapper { width: 100%; }
+            .card-img { right: auto; left: 0; width: 100%; }
+            .extra-text { max-height: none; opacity: 1; margin-top: 16px; display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <h1 class="hero-title">Lorem ipsum dolor sit<br>amet consectetur.</h1>
+
+    <div class="rows-container">
+        
+        <!-- Row 1 -->
+        <div class="row-card" data-color="#f97316">
+            <div class="col-title">
+                <h3 class="row-title">Lorem Ipsum</h3>
+            </div>
+            <div class="col-text">
+                <p class="row-subtitle">Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+                <p class="extra-text">Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.</p>
+            </div>
+            <div class="col-image">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?q=80&w=800&auto=format&fit=crop" alt="Image" class="card-img">
+                    <canvas class="pixel-effect-canvas"></canvas>
+                    <div class="color-bar" style="background-color: #f97316;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2 -->
+        <div class="row-card" data-color="#eab308">
+            <div class="col-title">
+                <h3 class="row-title">Dolor Sit Amet</h3>
+            </div>
+            <div class="col-text">
+                <p class="row-subtitle">Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</p>
+                <p class="extra-text">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+            </div>
+            <div class="col-image">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=800&auto=format&fit=crop" alt="Image" class="card-img">
+                    <canvas class="pixel-effect-canvas"></canvas>
+                    <div class="color-bar" style="background-color: #eab308;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 3 -->
+        <div class="row-card" data-color="#3b82f6">
+            <div class="col-title">
+                <h3 class="row-title">Consectetur</h3>
+            </div>
+            <div class="col-text">
+                <p class="row-subtitle">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit sed quia.</p>
+                <p class="extra-text">Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore.</p>
+            </div>
+            <div class="col-image">
+                <div class="img-wrapper">
+                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=800&auto=format&fit=crop" alt="Image" class="card-img">
+                    <canvas class="pixel-effect-canvas"></canvas>
+                    <div class="color-bar" style="background-color: #3b82f6;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const rows = document.querySelectorAll('.row-card');
+
+        // Hardcoded dimensions to guarantee exact canvas block math
+        const baseW = 240;
+        const baseH = 160;
+        const expW = 340;
+        const expH = 260;
+        const pixelSize = 20;
+
+        // Calculate left offset of the base image inside the expanded wrapper
+        const imgOffsetX = expW - baseW;
+
+        rows.forEach(row => {
+            const canvas = row.querySelector('.pixel-effect-canvas');
+            const ctx = canvas.getContext('2d');
+            const accentColor = row.dataset.color;
+            let animationFrameId;
+            let timeoutId;
+            let isHovered = false;
+
+            // Prepare canvas size
+            canvas.width = expW;
+            canvas.height = expH;
+
+            // Helper function to draw the exact L-shape masking the new expansion area
+            const fillMaskArea = () => {
+                ctx.fillStyle = accentColor;
+                // Area 1: Left vertical strip
+                ctx.fillRect(0, 0, imgOffsetX, expH);
+                // Area 2: Bottom horizontal strip (under the base image)
+                ctx.fillRect(imgOffsetX, baseH, baseW, expH - baseH);
+            };
+
+            row.addEventListener('mouseenter', () => {
+                isHovered = true;
+                clearTimeout(timeoutId);
+                cancelAnimationFrame(animationFrameId);
+
+                // Instantly draw the solid L-shape so as CSS expands, the background is colored
+                ctx.clearRect(0, 0, expW, expH); 
+                fillMaskArea();
+
+                // Wait slightly for container to physically expand before dropping pixels
+                timeoutId = setTimeout(() => {
+                    if (!isHovered) return;
+
+                    // Calculate grid array
+                    const cols = Math.ceil(expW / pixelSize);
+                    const rowsCount = Math.ceil(expH / pixelSize);
+                    let blocks = [];
+
+                    for(let r = 0; r < rowsCount; r++) {
+                        for(let c = 0; c < cols; c++) {
+                            const x = c * pixelSize;
+                            const y = r * pixelSize;
+                            // Only add blocks that fall within the solid L-shape area
+                            if (x < imgOffsetX || y >= baseH) {
+                                blocks.push({ c, r });
+                            }
+                        }
+                    }
+
+                    // Shuffle array for random decay
+                    for (let i = blocks.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [blocks[i], blocks[j]] = [blocks[j], blocks[i]];
+                    }
+
+                    const duration = 300; // Fast shatter
+                    let startTime = performance.now();
+                    let blocksCleared = 0;
+                    const totalBlocks = blocks.length;
+
+                    const renderEffect = (timestamp) => {
+                        const elapsed = timestamp - startTime;
+                        let progress = Math.min(elapsed / duration, 1);
+                        
+                        // Ease-out velocity
+                        const easeOut = 1 - Math.pow(1 - progress, 3);
+                        const targetBlocks = Math.floor(totalBlocks * easeOut);
+
+                        while (blocksCleared < targetBlocks && blocksCleared < totalBlocks) {
+                            const block = blocks[blocksCleared];
+                            const px = block.c * pixelSize;
+                            const py = block.r * pixelSize;
+                            
+                            // +1px prevents subtle sub-pixel gaps between blocks
+                            ctx.clearRect(px - 1, py - 1, pixelSize + 2, pixelSize + 2);
+                            blocksCleared++;
+                        }
+
+                        if (progress < 1 && isHovered) {
+                            animationFrameId = requestAnimationFrame(renderEffect);
+                        } else if (progress >= 1) {
+                            ctx.clearRect(0, 0, expW, expH);
+                        }
+                    };
+
+                    animationFrameId = requestAnimationFrame(renderEffect);
+                }, 150); // Small delay to sync with CSS expansion
+            });
+
+            row.addEventListener('mouseleave', () => {
+                isHovered = false;
+                clearTimeout(timeoutId);
+                cancelAnimationFrame(animationFrameId);
+                
+                // Immediately clear canvas so it doesn't leave artifacts as CSS shrinks it back
+                ctx.clearRect(0, 0, expW, expH);
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

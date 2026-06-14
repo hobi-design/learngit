@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Git commit standards, branch hygiene, and staging audit practices for developers.">
+  <title>Best Practices — Git Fundamentals</title>
+  <link rel="stylesheet" href="/src/css/global.css">
+  <script src="/src/components/theme-toggle.js"></script>
+</head>
+<body>
+
+  <!-- ─── Navigation ─────────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="/index.html" class="nav-logo">Git Fundamentals</a>
+      <div class="nav-links">
+        <a href="/index.html"           class="nav-link">Fundamentals</a>
+        <a href="/best-practices.html"  class="nav-link is-active">Best Practices</a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+          <!-- Moon: shown in dark mode -->
+          <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <!-- Sun: shown in light mode -->
+          <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ───────────────────────────────────────────────────────────── -->
+  <div class="hero container-page">
+    <p class="hero-eyebrow">Git Documentation · Best Practices</p>
+    <h1 class="type-display">
+      <span class="pixel-word">Best</span><br>Practices
+    </h1>
+    <p class="type-body hero-sub">
+      Technical standards and methodologies for structured version control.
+    </p>
+  </div>
+
+  <!-- ─── Pixel Transition ───────────────────────────────────────────────── -->
+  <div class="pixel-transition" id="pixel-transition">
+    <canvas id="pixel-canvas"></canvas>
+  </div>
+
+  <!-- ─── Main Content ───────────────────────────────────────────────────── -->
+  <main>
+
+    <!-- Section 01: Commit Structure -->
+    <div class="section container-page">
+      <div class="section-grid">
+
+        <div class="section-label">
+          <span class="type-label">01 · Integrity</span>
+          <h2 class="type-title">Commit<br>Structure</h2>
+        </div>
+
+        <div class="section-body">
+
+          <p class="type-body">
+            Commit messages explain the history of your project. Start them with an
+            action word (like 'add' or 'fix') rather than past tense. Use a standard
+            prefix to categorize the change, and don't mix unrelated updates in a
+            single commit.
+          </p>
+
+          <!-- Correct vs incorrect comparison -->
+          <div class="compare-grid">
+            <div class="compare-card compare-card--good">
+              <span class="compare-label type-label">
+                Imperative mood · Prefix
+                <span class="info-bubble" aria-label="What is imperative mood?">i
+                  <span class="tip" role="tooltip">
+                    The imperative mood expresses a direct command: “add” not “added”.
+                    Standardizes history to match auto-generated Git outputs (e.g.
+                    “Merge pull request…”) and answers: “If applied, this commit
+                    will [subject line].”
+                  </span>
+                </span>
+              </span>
+              <div class="code-block">
+                <pre>feat: add transformer layer to model</pre>
+              </div>
+            </div>
+            <div class="compare-card compare-card--bad">
+              <span class="compare-label type-label">Past tense · Vague</span>
+              <div class="code-block">
+                <pre>added some stuff for the ai</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Commit type reference table -->
+          <table class="data-table" aria-label="Conventional Commit prefix types">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Usage Scenario</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>feat</td>
+                <td>New feature (e.g., new data pipeline)</td>
+              </tr>
+              <tr>
+                <td>fix</td>
+                <td>Bug fix (e.g., resolving tensor dimension error)</td>
+              </tr>
+              <tr>
+                <td>docs</td>
+                <td>Documentation only (e.g., updating README)</td>
+              </tr>
+              <tr>
+                <td>chore</td>
+                <td>Maintenance (e.g., updating dependencies)</td>
+              </tr>
+              <tr>
+                <td>refactor</td>
+                <td>Code restructuring without behaviour change</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div><!-- /section-body -->
+      </div><!-- /section-grid -->
+    </div><!-- /section -->
+
+    <!-- Section 02: Branch Isolation -->
+    <div class="section container-page">
+      <div class="section-grid">
+
+        <div class="section-label">
+          <span class="type-label">02 · Stability</span>
+          <h2 class="type-title">Branch<br>Isolation</h2>
+        </div>
+
+        <div class="section-body">
+
+          <p class="type-body">
+            Isolate all active development inside dedicated feature branches.
+            Do not commit code directly to primary production branches to prevent
+            integration conflicts and trunk instability.
+          </p>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card--good">
+              <span class="compare-label type-label">Dedicated branch</span>
+              <div class="code-block">
+                <pre>git switch -c feature/add-transformer</pre>
+              </div>
+            </div>
+            <div class="compare-card compare-card--bad">
+              <span class="compare-label type-label">Direct commit to main</span>
+              <div class="code-block">
+                <pre>git commit -am "quick fix on main"</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Diagram with pixel dissolve -->
+          <div class="dissolve-panel" id="panel-branch" aria-label="Git branch topology diagram">
+            <svg viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <pattern id="g-branch" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1e1e1e" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="520" height="200" fill="url(#g-branch)"/>
+              <!-- main line -->
+              <line x1="40" y1="130" x2="470" y2="130" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="80"  cy="130" r="5" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="380" cy="130" r="5" fill="#141414" stroke="#2a2a2a" stroke-width="1.5"/>
+              <circle cx="440" cy="130" r="7" fill="#1c1c1c" stroke="#666666" stroke-width="1.5"/>
+              <text x="476" y="134" font-family="monospace" font-size="9" fill="#3f3f3f">main</text>
+              <!-- feature branch (dashed) -->
+              <path d="M 80 130 C 130 130 130 75 180 75 L 330 75 C 370 75 380 130 380 130"
+                    stroke="#383838" stroke-width="1.5" stroke-dasharray="4 3"/>
+              <circle cx="200" cy="75" r="4" fill="#141414" stroke="#383838" stroke-width="1.5"/>
+              <circle cx="290" cy="75" r="4" fill="#141414" stroke="#383838" stroke-width="1.5"/>
+              <text x="195" y="60" font-family="monospace" font-size="9" fill="#3f3f3f">feature/add-transformer</text>
+            </svg>
+            <canvas id="canvas-branch"></canvas>
+            <span class="dissolve-label type-label" id="label-branch">Hover · Reveal</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 03: Staging Audit -->
+    <div class="section container-page">
+      <div class="section-grid">
+
+        <div class="section-label">
+          <span class="type-label">03 · Hygiene</span>
+          <h2 class="type-title">Staging<br>Audit</h2>
+        </div>
+
+        <div class="section-body">
+
+          <p class="type-body">
+            Audit all changes prior to creating a commit. Review diffs hunk-by-hunk
+            and exclude temporary configs, environment keys, and build artifacts from
+            tracking via <code>.gitignore</code>.
+          </p>
+
+          <div class="compare-grid">
+            <div class="compare-card compare-card--good">
+              <span class="compare-label type-label">Targeted · Hunk-by-hunk</span>
+              <div class="code-block">
+                <pre>git add -p model.py</pre>
+              </div>
+            </div>
+            <div class="compare-card compare-card--bad">
+              <span class="compare-label type-label">Blind · Everything staged</span>
+              <div class="code-block">
+                <pre>git add .</pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="dissolve-panel" id="panel-stage" aria-label="Git staging area diagram">
+            <svg viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <defs>
+                <pattern id="g-stage" width="24" height="24" patternUnits="userSpaceOnUse">
+                  <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1e1e1e" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="520" height="200" fill="url(#g-stage)"/>
+              <!-- Workspace -->
+              <rect x="30" y="45" width="110" height="115" fill="#0c0c0c" stroke="#2a2a2a" stroke-width="1"/>
+              <text x="85" y="38" font-family="monospace" font-size="8" fill="#3f3f3f" text-anchor="middle">Working Tree</text>
+              <rect x="44" y="62" width="82" height="14" fill="#141414" stroke="none"/>
+              <text x="85" y="72" font-family="monospace" font-size="7" fill="#666666" text-anchor="middle">model.py (M)</text>
+              <rect x="44" y="81" width="82" height="14" fill="#141414" stroke="none"/>
+              <text x="85" y="91" font-family="monospace" font-size="7" fill="#3f3f3f" text-anchor="middle">config.env</text>
+              <rect x="44" y="100" width="82" height="14" fill="#141414" stroke="none"/>
+              <text x="85" y="110" font-family="monospace" font-size="7" fill="#3f3f3f" text-anchor="middle">build/output</text>
+              <!-- Arrow -->
+              <path d="M 148 102 L 208 102" stroke="#383838" stroke-width="1"/>
+              <path d="M 202 97 L 208 102 L 202 107" stroke="#383838" stroke-width="1"/>
+              <text x="178" y="93" font-family="monospace" font-size="7" fill="#666666" text-anchor="middle">git add -p</text>
+              <!-- Staging area -->
+              <rect x="218" y="45" width="110" height="115" fill="#141414" stroke="#383838" stroke-width="1"/>
+              <text x="273" y="38" font-family="monospace" font-size="8" fill="#666666" text-anchor="middle">Index (Staged)</text>
+              <rect x="232" y="62" width="82" height="14" fill="#1c1c1c" stroke="#383838" stroke-width="1"/>
+              <text x="273" y="72" font-family="monospace" font-size="7" fill="#a0a0a0" text-anchor="middle">model.py</text>
+              <!-- .gitignore -->
+              <rect x="385" y="70" width="88" height="62" fill="#0c0c0c" stroke="#1e1e1e" stroke-width="1"/>
+              <text x="429" y="63" font-family="monospace" font-size="8" fill="#3f3f3f" text-anchor="middle">.gitignore</text>
+              <text x="429" y="93" font-family="monospace" font-size="7" fill="#3f3f3f" text-anchor="middle">config.env</text>
+              <text x="429" y="107" font-family="monospace" font-size="7" fill="#3f3f3f" text-anchor="middle">build/</text>
+              <line x1="337" y1="102" x2="378" y2="102" stroke="#1e1e1e" stroke-width="1" stroke-dasharray="3 3"/>
+            </svg>
+            <canvas id="canvas-stage"></canvas>
+            <span class="dissolve-label type-label" id="label-stage">Hover · Reveal</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ─── Footer ─────────────────────────────────────────────────────────── -->
+  <footer class="footer container-page">
+    <div class="footer-inner">
+      <p class="type-label">Git Crash Course · v1.0</p>
+      <p class="type-label">Best Practices</p>
+    </div>
+  </footer>
+
+  <!-- ─── Scripts ────────────────────────────────────────────────────────── -->
+  <script src="/src/components/pixel-transition.js"></script>
+  <script src="/src/components/dissolve-panel.js"></script>
+  <script>
+    PixelTransition.init('pixel-transition', 'pixel-canvas', {
+      cellSize:       96,
+      noiseIntensity: 0.85,
+      colorTop:       '#141414',
+      colorBottom:    '#0c0c0c',
+    });
+    DissolvePanel.init('panel-branch', 'canvas-branch', 'label-branch');
+    DissolvePanel.init('panel-stage',  'canvas-stage',  'label-stage');
+  </script>
+
+</body>
+</html>

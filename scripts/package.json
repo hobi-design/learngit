@@ -1,0 +1,16 @@
+{
+  "name": "learngit-screenshots",
+  "version": "1.0.0",
+  "description": "Playwright screenshot pipeline for Git tutorial teaching assets",
+  "type": "module",
+  "scripts": {
+    "capture": "node capture-screenshots.js",
+    "setup": "bash setup-mock-repo.sh"
+  },
+  "dependencies": {
+    "playwright": "1.49.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
