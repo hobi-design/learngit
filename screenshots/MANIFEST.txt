@@ -1,0 +1,68 @@
+# Screenshot Manifest
+# Generated: 2026-06-14T23:50:09.726Z
+# Repo: https://github.com/hobi-design/learning-git-demo
+# Closeups: 35/44 captured
+# Full Page: 14/15 captured
+
+## Closeups (44)
+1 | repo-file-tree.png | File listing grid with icons and commit messages | https://github.com/hobi-design/learning-git-demo
+2 | gitignore-file-row.png | Single .gitignore row with file icon | https://github.com/hobi-design/learning-git-demo
+3 | readme-rendered-preview.png | README card below file tree | https://github.com/hobi-design/learning-git-demo
+4 | repo-about-panel.png [PENDING] | Right sidebar About section | https://github.com/hobi-design/learning-git-demo
+5 | repo-tab-bar.png | Code/Issues/PR/Actions tab row | https://github.com/hobi-design/learning-git-demo
+6 | branch-selector-closed.png | Branch button closed showing main | https://github.com/hobi-design/learning-git-demo
+7 | branch-selector-open-empty.png | Dropdown open, no search text | https://github.com/hobi-design/learning-git-demo
+8 | branch-selector-typing.png | Dropdown with branch name typed, Create branch prompt shown | https://github.com/hobi-design/learning-git-demo
+9 | branch-list-all.png | Branches page branch table rows | https://github.com/hobi-design/learning-git-demo
+10 | branch-behind-badge.png | X commits behind pill | https://github.com/hobi-design/learning-git-demo
+11 | default-branch-label.png | Green default badge on main | https://github.com/hobi-design/learning-git-demo
+12 | commit-history-four-rows.png | 4 commit rows block | https://github.com/hobi-design/learning-git-demo
+13 | commit-verified-badge.png | Green Verified badge + hash | https://github.com/hobi-design/learning-git-demo
+14 | commit-hash-chip.png | Short hash with copy icon | https://github.com/hobi-design/learning-git-demo
+15 | commit-detail-header.png | Commit page top: message, author, date | https://github.com/hobi-design/learning-git-demo
+16 | commit-diff-stat-bar.png | +3 −2 colored bar | https://github.com/hobi-design/learning-git-demo
+17 | commit-file-diff-block.png | One file unified diff (file header + lines) | https://github.com/hobi-design/learning-git-demo
+18 | commit-parent-link.png | 1 parent link in commit header | https://github.com/hobi-design/learning-git-demo
+19 | commit-tree-indicator.png | Branch indicator on commit page | https://github.com/hobi-design/learning-git-demo
+20 | commit-browse-files-button.png | Browse files button | https://github.com/hobi-design/learning-git-demo
+21 | split-diff-panel.png | Full split diff of pipeline.py | https://github.com/hobi-design/learning-git-demo
+22 | split-diff-gutter.png | Center gutter between split halves | https://github.com/hobi-design/learning-git-demo
+23 | unified-diff-hunk-header.png | @@ hunk header with context | https://github.com/hobi-design/learning-git-demo
+24 | diff-line-comment-trigger.png [PENDING] | Blue + button on hover | https://github.com/hobi-design/learning-git-demo
+25 | diff-inline-comment-box.png [PENDING] | Comment textarea expanded | https://github.com/hobi-design/learning-git-demo
+26 | diff-file-header-row.png | File diff header bar | https://github.com/hobi-design/learning-git-demo
+27 | diff-viewed-checkbox.png [PENDING] | Viewed checkbox in PR files changed | https://github.com/hobi-design/learning-git-demo
+28 | pr-list-row.png | One PR in the list | https://github.com/hobi-design/learning-git-demo
+29 | pr-header-block.png | PR page header with badges | https://github.com/hobi-design/learning-git-demo
+30 | pr-tab-row.png | PR internal tabs (Conversation, Commits, Files) | https://github.com/hobi-design/learning-git-demo
+31 | pr-merge-conflict-box.png | Red conflict status box | https://github.com/hobi-design/learning-git-demo
+32 | pr-cant-automerge-box.png [PENDING] | Grey can't automerge notice | https://github.com/hobi-design/learning-git-demo
+33 | pr-merge-button.png [PENDING] | Green merge button | https://github.com/hobi-design/learning-git-demo
+34 | pr-merged-state-badge.png | Purple Merged badge | https://github.com/hobi-design/learning-git-demo
+35 | pr-closed-state-badge.png [PENDING] | Red Closed badge (if applicable) | https://github.com/hobi-design/learning-git-demo
+36 | pr-restore-branch-button.png [PENDING] | Restore branch button | https://github.com/hobi-design/learning-git-demo
+37 | pr-timeline-merge-event.png | Merge event in timeline | https://github.com/hobi-design/learning-git-demo
+38 | sync-behind-banner.png | Yellow X commits behind banner | https://github.com/hobi-design/learning-git-demo
+39 | file-blame-rows.png | Blame view with attribution blocks | https://github.com/hobi-design/learning-git-demo
+40 | file-view-toolbar.png | Raw/Blame/History buttons above file | https://github.com/hobi-design/learning-git-demo
+41 | network-graph-crop.png | Network graph branch visualization | https://github.com/hobi-design/learning-git-demo
+42 | go-to-file-modal.png | Fuzzy finder with pipeline typed | https://github.com/hobi-design/learning-git-demo
+43 | branch-protection-rule-checkbox.png [PENDING] | Protection rule checkbox (skip if no access) | https://github.com/hobi-design/learning-git-demo
+44 | commit-activity-bars.png | Insights commit activity chart | https://github.com/hobi-design/learning-git-demo
+
+## Full Page (15)
+1 | full-repo-home.png | Repository home page Code tab | https://github.com/hobi-design/learning-git-demo
+2 | full-commit-history.png | Commits history page /commits/main | https://github.com/hobi-design/learning-git-demo
+3 | full-commit-detail.png | Single commit page | https://github.com/hobi-design/learning-git-demo
+4 | full-branches-page.png | Branches page /branches | https://github.com/hobi-design/learning-git-demo
+5 | full-pr-list.png | Pull requests tab | https://github.com/hobi-design/learning-git-demo
+6 | full-pr-open-conflict.png | The conflicting PR page | https://github.com/hobi-design/learning-git-demo
+7 | full-pr-merged.png | The merged PR page | https://github.com/hobi-design/learning-git-demo
+8 | full-pr-files-changed.png | Files changed tab | https://github.com/hobi-design/learning-git-demo
+9 | full-file-view.png | pipeline.py file view | https://github.com/hobi-design/learning-git-demo
+10 | full-file-blame.png | pipeline.py blame view | https://github.com/hobi-design/learning-git-demo
+11 | full-network-graph.png | Network graph page | https://github.com/hobi-design/learning-git-demo
+12 | full-insights-traffic.png | Insights page | https://github.com/hobi-design/learning-git-demo
+13 | full-releases-page.png | Releases page | https://github.com/hobi-design/learning-git-demo
+14 | full-tags-page.png | Tags page | https://github.com/hobi-design/learning-git-demo
+15 | full-repo-settings.png [PENDING] | Settings general (skip if 404/auth required) | https://github.com/hobi-design/learning-git-demo

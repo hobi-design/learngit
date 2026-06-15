@@ -86,11 +86,28 @@ async function safeElementShot(page, selectors, filename, options = {}) {
       const isVisible = await element.isVisible({ timeout: 5000 }).catch(() => false);
       if (!isVisible) continue;
 
+      await element.scrollIntoViewIfNeeded();
       await waitForStable(element);
-      await element.screenshot({
-        path: join(CLOSEUP_DIR, filename),
-        ...options,
-      });
+
+      const box = await element.boundingBox();
+      if (box) {
+        const padding = options.padding !== undefined ? options.padding : 100;
+        const x = Math.max(0, box.x - padding);
+        const y = Math.max(0, box.y - padding);
+        const w = Math.min(CONFIG.viewport.width - x, box.width + 2 * padding);
+        const h = Math.min(CONFIG.viewport.height - y, box.height + 2 * padding);
+
+        await page.screenshot({
+          path: join(CLOSEUP_DIR, filename),
+          clip: { x, y, width: w, height: h },
+          ...options,
+        });
+      } else {
+        await element.screenshot({
+          path: join(CLOSEUP_DIR, filename),
+          ...options,
+        });
+      }
       return { success: true };
     } catch {
       continue;
@@ -227,11 +244,13 @@ const closeupShots = [
     capture: async (page, ctx) => {
       await navigate(page, REPO_URL);
       // Click to open branch selector
-      const trigger = page.locator('[data-hotkey="w"], #branch-select-menu, [data-testid="branch-picker-ref-selector"], summary:has-text("main")').first();
+      const trigger = page.locator('#ref-picker-repos-header-ref-selector, [data-hotkey="w"], #branch-select-menu, [data-testid="branch-picker-ref-selector"], summary:has-text("main"), button:has-text("main")').first();
       try {
         await trigger.click({ timeout: 5000 });
         await page.waitForTimeout(CONFIG.animationDelay);
         return safeElementShot(page, [
+          'div[role="dialog"]:has(input[placeholder="Find a branch..."])',
+          'div[role="dialog"]:has-text("Switch branches/tags")',
           '[role="menu"]:visible',
           ".SelectMenu-modal:visible",
           '[data-testid="branch-picker-menu"]',
@@ -249,15 +268,17 @@ const closeupShots = [
     description: "Dropdown with branch name typed, Create branch prompt shown",
     capture: async (page, ctx) => {
       await navigate(page, REPO_URL);
-      const trigger = page.locator('[data-hotkey="w"], #branch-select-menu, [data-testid="branch-picker-ref-selector"], summary:has-text("main")').first();
+      const trigger = page.locator('#ref-picker-repos-header-ref-selector, [data-hotkey="w"], #branch-select-menu, [data-testid="branch-picker-ref-selector"], summary:has-text("main"), button:has-text("main")').first();
       try {
         await trigger.click({ timeout: 5000 });
         await page.waitForTimeout(CONFIG.animationDelay);
         // Type in search box
-        const input = page.locator('[role="menu"] input, .SelectMenu-input, [placeholder*="branch"], [placeholder*="Find"]').first();
+        const input = page.locator('input[placeholder="Find a branch..."], [role="menu"] input, .SelectMenu-input, [placeholder*="branch"], [placeholder*="Find"]').first();
         await input.fill("feat/experimental-ai-logic");
         await page.waitForTimeout(CONFIG.animationDelay);
         return safeElementShot(page, [
+          'div[role="dialog"]:has(input[placeholder="Find a branch..."])',
+          'div[role="dialog"]:has-text("Switch branches/tags")',
           '[role="menu"]:visible',
           ".SelectMenu-modal:visible",
           '[data-testid="branch-picker-menu"]',
@@ -275,6 +296,9 @@ const closeupShots = [
     capture: async (page, ctx) => {
       await navigate(page, `${REPO_URL}/branches`);
       return safeElementShot(page, [
+        '[class*="prc-DataTable-TableContainer"]',
+        '[class*="Overview-module__SectionContainer"]',
+        '[class*="BranchesTable-module"]',
         '[data-testid="branch-list"]',
         ".Box .branch-list",
         'div[data-target="branch-filter.list"]',
@@ -321,6 +345,9 @@ const closeupShots = [
       await navigate(page, `${REPO_URL}/commits/main`);
       // Try to capture the first few commit rows as a group
       return safeElementShot(page, [
+        '[class*="ListView-module__container"]',
+        'ul.ListView-module__ul__uMK30',
+        'main ul',
         '[data-testid="commit-row-group"]',
         ".TimelineItem:nth-child(-n+4)",
         'ol[data-testid="commit-list"]',
@@ -350,6 +377,8 @@ const closeupShots = [
     capture: async (page, ctx) => {
       await navigate(page, `${REPO_URL}/commits/main`);
       return safeElementShot(page, [
+        '[data-testid="commit-row-item"] [class*="Metadata-module__primary"]',
+        '[data-testid="commit-row-item"] a[href*="/commit/"]',
         '[data-testid="commit-row-item"] [class*="sha"]',
         'clipboard-copy[aria-label="Copy full SHA"]',
         'a[data-testid="commit-link"]',
@@ -365,7 +394,7 @@ const closeupShots = [
     capture: async (page, ctx) => {
       // Navigate to first commit
       await navigate(page, `${REPO_URL}/commits/main`);
-      const commitLink = page.locator('a[data-testid="commit-link"], .TimelineItem a[href*="/commit/"], li a[href*="/commit/"]').first();
+      const commitLink = page.locator('[data-testid="commit-row-item"] a[href*="/commit/"], a[data-testid="commit-link"], .TimelineItem a[href*="/commit/"], li a[href*="/commit/"]').first();
       try {
         const href = await commitLink.getAttribute("href", { timeout: 5000 });
         if (href) {
@@ -378,6 +407,8 @@ const closeupShots = [
         await navigate(page, `${REPO_URL}/commits/main`);
       }
       return safeElementShot(page, [
+        'div:has(> [class*="CommitHeader-module__commitBranchContainer"])',
+        '[class*="CommitHeader-module__commitBranchContainer"]',
         ".commit-title",
         '[data-testid="commit-header"]',
         ".commit-desc",
@@ -395,6 +426,8 @@ const closeupShots = [
         await navigate(page, ctx.commitUrl);
       }
       return safeElementShot(page, [
+        '[class*="CommitHeader-module__commitFilesChangedContainer"]',
+        '[class*="DiffFileHeader-module__hide-on-mobile"]',
         '[data-testid="diffstat"]',
         ".diffstat",
         ".toc-diff-stats",
@@ -411,6 +444,8 @@ const closeupShots = [
         await navigate(page, ctx.commitUrl);
       }
       return safeElementShot(page, [
+        'div:has(> [class*="Diff-module__diffHeaderWrapper"])',
+        '[class*="Diff-module__diffHeaderWrapper"]',
         '[data-testid="diff-file-block"]:first-of-type',
         ".file.js-file:first-of-type",
         '.diff-view [data-path]:first-of-type',
@@ -428,6 +463,7 @@ const closeupShots = [
         await navigate(page, ctx.commitUrl);
       }
       return safeElementShot(page, [
+        '[class*="CommitHeader-module__commitBranchContainer"] a[href*="/commit/"]',
         ':text("parent"):visible',
         'a:has-text("parent")',
         ".sha-block:has(a[href*='commit'])",
@@ -444,6 +480,7 @@ const closeupShots = [
         await navigate(page, ctx.commitUrl);
       }
       return safeElementShot(page, [
+        '[class*="CommitHeader-module__commitBranchContainer"]',
         '[data-testid="commit-branches"]',
         ".commit-branches",
         'span:has-text("main")',
@@ -477,14 +514,30 @@ const closeupShots = [
       // Navigate to the conflicting PR's files changed
       if (ctx.conflictPrUrl) {
         await navigate(page, `${ctx.conflictPrUrl}/files`);
-        // Try to switch to split view
-        const splitBtn = page.locator('button:has-text("Split"), [aria-label="Split view"]').first();
         try {
-          await splitBtn.click({ timeout: 3000 });
+          // Open Diff settings popover
+          const diffViewToggle = page.locator('summary:has-text("Diff view"), details:has-text("Diff view") summary').first();
+          await diffViewToggle.click({ timeout: 5000 });
           await page.waitForTimeout(CONFIG.animationDelay);
-        } catch { /* split may already be active */ }
+
+          // Click Split radio option
+          const splitRadio = page.locator('input[type="radio"][value="split"], label:has-text("Split") input').first();
+          await splitRadio.click({ timeout: 3000 });
+
+          // Click Apply and reload button
+          const applyBtn = page.locator('button:has-text("Apply and reload")').first();
+          await applyBtn.click({ timeout: 3000 });
+
+          // Wait for page to reload/navigate
+          await page.waitForLoadState('networkidle');
+          await page.waitForTimeout(1000);
+        } catch (e) {
+          console.log(`(Failed to toggle split view: ${e.message})`);
+        }
       }
       return safeElementShot(page, [
+        'div:has(> [data-path="pipeline.py"])',
+        '[class*="file-header"][data-path="pipeline.py"]',
         '[data-path="pipeline.py"]',
         '.file:has([title="pipeline.py"])',
         'copilot-diff-entry:has([title="pipeline.py"])',
@@ -644,6 +697,9 @@ const closeupShots = [
         await navigate(page, ctx.conflictPrUrl);
       }
       return safeElementShot(page, [
+        'nav[aria-label="Pull request navigation tabs"]',
+        '[class*="TabNav-TabNavNav"]',
+        '[class*="TabNav-TabNavTabList"]',
         '[data-testid="pull-header-tabs"]',
         'nav[aria-label="Pull request tabs"]',
         ".tabnav-tabs",
@@ -806,6 +862,9 @@ const closeupShots = [
     capture: async (page, ctx) => {
       await navigate(page, `${REPO_URL}/blame/main/pipeline.py`);
       return safeElementShot(page, [
+        ".react-blame-segment-wrapper",
+        '[class*="CodeBlob-module__codeBlobInnerBlame"]',
+        ".virtual-blame-wrapper",
         ".blame-container",
         ".blame-hunk",
         '[data-testid="blame-view"]',
@@ -1080,6 +1139,48 @@ const fullPageShots = [
   },
 ];
 
+async function initContext(page, ctx) {
+  console.log("Initializing shared context (PR and Commit URLs)...");
+  // Find open conflict PR
+  try {
+    await navigate(page, `${REPO_URL}/pulls`);
+    const prLink = page.locator('a[data-testid="issue-title-link"], .js-issue-row a[href*="/pull/"], .Box-row a[href*="/pull/"]').first();
+    const href = await prLink.getAttribute("href", { timeout: 5000 });
+    if (href) {
+      ctx.conflictPrUrl = href.startsWith("http") ? href : `https://github.com${href}`;
+      console.log(`  Found conflict PR: ${ctx.conflictPrUrl}`);
+    }
+  } catch (e) {
+    console.log("  Could not find open PR:", e.message);
+  }
+
+  // Find merged PR
+  try {
+    await navigate(page, `${REPO_URL}/pulls?q=is%3Apr+is%3Amerged`);
+    const mergedPrLink = page.locator('a[data-testid="issue-title-link"], a[href*="/pull/"]').first();
+    const href = await mergedPrLink.getAttribute("href", { timeout: 5000 });
+    if (href) {
+      ctx.mergedPrUrl = href.startsWith("http") ? href : `https://github.com${href}`;
+      console.log(`  Found merged PR:   ${ctx.mergedPrUrl}`);
+    }
+  } catch (e) {
+    console.log("  Could not find merged PR:", e.message);
+  }
+
+  // Find first commit URL
+  try {
+    await navigate(page, `${REPO_URL}/commits/main`);
+    const commitLink = page.locator('[data-testid="commit-row-item"] a[href*="/commit/"], a[data-testid="commit-link"], .TimelineItem a[href*="/commit/"], li a[href*="/commit/"]').first();
+    const href = await commitLink.getAttribute("href", { timeout: 5000 });
+    if (href) {
+      ctx.commitUrl = href.startsWith("http") ? href : `https://github.com${href}`;
+      console.log(`  Found commit URL:  ${ctx.commitUrl}`);
+    }
+  } catch (e) {
+    console.log("  Could not find commit URL:", e.message);
+  }
+}
+
 // =============================================================================
 // Main Execution
 // =============================================================================
@@ -1141,6 +1242,8 @@ async function main() {
     conflictPrUrl: null,
     mergedPrUrl: null,
   };
+
+  await initContext(page, ctx);
 
   const results = { closeups: [], fullPage: [] };
 
